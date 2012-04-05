@@ -1,0 +1,88 @@
+body {
+    background: #ccc;
+    color: #333;
+    font: 14px 'Arial',sans-serif;
+    text-align: center;
+}
+a {
+    color: #506e2f;
+    text-decoration: none;
+}
+a:hover {
+    color: #ff4500;
+}
+div.contenedor {
+    width: 100%;
+    margin: 0 auto;
+}
+div.izquierda, div.derecha {
+    width: 300px;
+}
+div.izquierda {
+    float: left;
+    text-align: left;
+}
+div.juego {
+
+}
+div.juego canvas {
+    box-shadow: 0 0 30px #000;
+}
+div.derecha {
+    float: right;
+}
+div.derecha h3.tituloPuntuaciones {
+    background: url("../images/medalla.png") no-repeat left;
+    padding: 10px;
+}
+div.derecha ul#puntuaciones {
+    width: 300px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+div.derecha ul#puntuaciones li{
+    line-height:1.5em;
+    border-bottom:1px solid #aaa;
+    float:left;
+    display:inline;
+    width: 50%;
+    padding: 10px 0;
+}
+.negrita {
+    font-weight: bold;
+}
+ul.lista {
+    margin: 25px 0;
+    padding: 0;
+    list-style: none;
+    text-align: left;
+}
+ul.lista li {
+    padding: 10px 0;
+}
+ul.lista li.firefox, ul.lista li.chrome, ul.lista li.safari, ul.lista li.izquierda, ul.lista li.derecha, ul.lista li.espacio {
+    padding-left: 40px;
+}
+ul.lista li.izquierda {
+    background: url("../images/izquierda.png") no-repeat left;
+}
+ul.lista li.derecha {
+    background: url("../images/derecha.png") no-repeat left;
+}
+ul.lista li.espacio {
+    background: url("../images/space.gif") no-repeat left;
+}
+ul.lista li.firefox {
+    background: url("../images/firefox.png") no-repeat left;
+}
+ul.lista li.chrome {
+    background: url("../images/chrome.png") no-repeat left;
+}
+ul.lista li.safari {
+    background: url("../images/safari.png") no-repeat left;
+}
+ul.lista li.titulo {
+    font-weight: bold;
+}

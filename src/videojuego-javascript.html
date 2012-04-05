@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Videojuego con Javascript y HTML5</title>
+    <link type="text/css" rel="stylesheet" href="css/main.css?04042012">
+    <script src="js/videojuego-javascript.js?04042012" type="text/javascript"></script>
+</head>
+<body onload="game.init()">
+    <div class="contenedor">
+        <div class="izquierda">
+            <a href="http://www.autentia.com" target="_blank">
+                <img src="images/autentia.png" alt="Autentia"/>
+            </a>
+            <p>
+                <a href="#" target="_blank" class="negrita">Crear un videojuego con Javascript y HTML5</a>
+            </p>
+            <p>
+                Desarrollado por: <a href="http://www.adictosaltrabajo.com/usuarios/miguel-arlandy" target="_blank">Miguel Arlandy Rodríguez</a>
+            </p>
+            <ul class="lista">
+                <li class="titulo">CONTROLES:</li>
+                <li class="izquierda">izquierda</li>
+                <li class="derecha">derecha</li>
+                <li class="espacio">disparar</li>
+            </ul>
+            <ul class="lista">
+                <li class="titulo">PROBADO CON:</li>
+                <li class="firefox">Mozilla Firefox 11</li>
+                <li class="chrome">Google Chrome 18</li>
+                <li class="safari">Safari 5.1</li>
+            </ul>
+            <ul class="lista">
+                <li class="titulo">OTROS:</li>
+                <li><a href="#" target="_blank">Tutorial sobre cómo se hizo</a></li>
+                <li><a href="#" target="_blank">Código fuente del juego</a></li>
+            </ul>
+        </div>
+        <div class="derecha">
+            <h3 class="tituloPuntuaciones">MEJORES PUNTUACIONES</h3>
+            <ul id="puntuaciones"></ul>
+        </div>
+        <div class="juego">
+            <canvas id="canvas" class="juego" width="600" height="650">TU NAVEGADOR NO SOPORTA HTML5!</canvas>
+        </div>
+
+    </div>
+
+</body>
+</html>
