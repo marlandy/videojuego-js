@@ -31,15 +31,16 @@ var game = (function () {
         totalEvils = 7,
         playerLife = 3,
         shotSpeed = 5,
+        playerSpeed = 5,
         evilCounter = 0,
         youLoose = false,
         congratulations = false,
         minHorizontalOffset = 100,
         maxHorizontalOffset = 400,
         evilShots = 5,   // disparos que tiene el malo al principio
-        evilLife = 5,    // vidas que tiene el malo al principio
+        evilLife = 3,    // vidas que tiene el malo al principio (se van incrementando)
         finalBossShots = 30,
-        finalBossLife = 20,
+        finalBossLife = 12,
         totalBestScoresToShow = 5, // las mejores puntuaciones que se mostraran
         playerShotsBuffer = [],
         evilShotsBuffer = [],
@@ -105,17 +106,17 @@ var game = (function () {
 
     function Player(life, score) {
         var settings = {
-            bottomMargin : 10
+            marginBottom : 10,
+            defaultHeight : 66
         };
         player = new Image();
         player.src = 'images/bueno.png';
         player.posX = (canvas.width / 2) - (player.width / 2);
-        player.posY = canvas.height - (player.height == 0 ? 66 : player.height) - settings.bottomMargin;
+        player.posY = canvas.height - (player.height == 0 ? settings.defaultHeight : player.height) - settings.marginBottom;
         player.life = life;
         player.score = score;
         player.dead = false;
-
-        player.speed = 5;
+        player.speed = playerSpeed;
 
         var shoot = function () {
             if (nextPlayerShot < now || now == 0) {
