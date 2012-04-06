@@ -1,3 +1,4 @@
+// nos marca los pulsos del juego
 window.requestAnimFrame = (function () {
     return  window.requestAnimationFrame        ||
         window.webkitRequestAnimationFrame  ||
@@ -116,7 +117,7 @@ var game = (function () {
 
         player.speed = 5;
 
-        player.shoot = function () {
+        var shoot = function () {
             if (nextPlayerShot < now || now == 0) {
                 playerShot = new PlayerShot(player.posX + (player.width / 2) - 5 , player.posY);
                 playerShot.add();
@@ -126,9 +127,37 @@ var game = (function () {
                 now = new Date().getTime();
             }
         };
+
+        player.doAnything = function() {
+            if (player.dead)
+                return;
+            if (keyPressed.left && player.posX > 5)
+                player.posX -= player.speed;
+            if (keyPressed.right && player.posX < (canvas.width - player.width - 5))
+                player.posX += player.speed;
+            if (keyPressed.fire)
+                shoot();
+        };
+
+        player.killPlayer = function() {
+            if (this.life > 0) {
+                this.dead = true;
+                evilShotsBuffer.splice(0, evilShotsBuffer.length);
+                playerShotsBuffer.splice(0, playerShotsBuffer.length);
+                this.src = 'images/bueno_muerto.png';
+                createNewEvil();
+                setTimeout(function () {
+                    player = new Player(player.life - 1, player.score);
+                }, 500);
+
+            } else {
+                saveFinalScore();
+                youLoose = true;
+            }
+        };
+
         return player;
     }
-
 
     /******************************* DISPAROS *******************************/
     function Shot( x, y, array) {
@@ -148,6 +177,10 @@ var game = (function () {
     function PlayerShot (x, y) {
         Object.getPrototypeOf(PlayerShot.prototype).constructor.call(this, x, y, playerShotsBuffer);
         this.image.src =  'images/disparo_bueno.png';
+        this.isHittingEvil = function() {
+            return (!evil.dead && this.posX >= evil.posX && this.posX <= (evil.posX + evil.image.width) &&
+                this.posY >= evil.posY && this.posY <= (evil.posY + evil.image.height));
+        };
     }
 
     PlayerShot.prototype = Object.create(Shot.prototype);
@@ -156,6 +189,10 @@ var game = (function () {
     function EvilShot (x, y) {
         Object.getPrototypeOf(EvilShot.prototype).constructor.call(this, x, y, evilShotsBuffer);
         this.image.src =  'images/disparo_malo.png';
+        this.isHittingPlayer = function() {
+            return (this.posX >= player.posX && this.posX <= (player.posX + player.width)
+                && this.posY >= player.posY && this.posY <= (player.posY + player.height));
+        };
     }
 
     EvilShot.prototype = Object.create(Shot.prototype);
@@ -175,6 +212,8 @@ var game = (function () {
         this.shots = shots ? shots : evilShots;
         this.dead = false;
 
+        var replacementRegExp = new RegExp(/\d{1}\.png$/);
+
         var desplazamientoHorizontal = minHorizontalOffset +
             getRandomNumber(maxHorizontalOffset - minHorizontalOffset);
         this.minX = getRandomNumber(canvas.width - desplazamientoHorizontal);
@@ -185,7 +224,7 @@ var game = (function () {
         this.kill = function() {
             this.dead = true;
             totalEvils --;
-            this.image.src = this.image.src.replace(/\d/, '_muerto');
+            this.image.src = this.image.src.replace(replacementRegExp, '_muerto.png');
             verifyToCreateNewEvil();
         };
 
@@ -213,7 +252,7 @@ var game = (function () {
                 if (this.imageNumber > 8) {
                     this.imageNumber = 1;
                 }
-                this.image.src = this.image.src.replace(/\d/, this.imageNumber);
+                this.image.src = this.image.src.replace(replacementRegExp, this.imageNumber + '.png');
             }
         };
 
@@ -292,36 +331,22 @@ var game = (function () {
                 (player.posX + player.width >= evil.posX && (player.posX + player.width) <= (evil.posX + evil.image.width))));
     }
 
-    function isShotHittingPlayer(evilShot) {
-        return (evilShot.posX >= player.posX && evilShot.posX <= (player.posX + player.width)
-            && evilShot.posY >= player.posY && evilShot.posY <= (player.posY + player.height));
-    }
-
     function checkCollisions(shot) {
-        if (!evil.dead && shot.posX >= evil.posX && shot.posX <= (evil.posX + evil.image.width)) {
-            if (shot.posY >= evil.posY && shot.posY <= (evil.posY + evil.image.height)) {
-                if (evil.life > 1) {
-                    evil.life--;
-                } else {
-                    evil.kill();
-                    player.score += evil.pointsToKill;
-                }
-                shot.deleteShot(parseInt(shot.identifier));
-                return false;
+        if (shot.isHittingEvil()) {
+            if (evil.life > 1) {
+                evil.life--;
+            } else {
+                evil.kill();
+                player.score += evil.pointsToKill;
             }
+            shot.deleteShot(parseInt(shot.identifier));
+            return false;
         }
         return true;
     }
 
     function playerAction() {
-        if (player.dead)
-            return;
-        if (keyPressed.left && player.posX > 5)
-            player.posX -= player.speed;
-        if (keyPressed.right && player.posX < (canvas.width - player.width - 5))
-            player.posX += player.speed;
-        if (keyPressed.fire)
-            player.shoot();
+        player.doAnything();
     }
 
     function addListener(element, type, expression, bubbling) {
@@ -377,23 +402,6 @@ var game = (function () {
         return player.score + player.life * 5;
     }
 
-    function killPlayer() {
-        if (player.life > 0) {
-            player.dead = true;
-            evilShotsBuffer.splice(0, evilShotsBuffer.length);
-            playerShotsBuffer.splice(0, playerShotsBuffer.length);
-            player.src = 'images/bueno_muerto.png';
-            createNewEvil();
-            setTimeout(function () {
-                player = new Player(player.life - 1, player.score);
-            }, 500);
-
-        } else {
-            saveFinalScore();
-            youLoose = true;
-        }
-    }
-
     function update() {
 
         drawBackground();
@@ -408,10 +416,10 @@ var game = (function () {
             return;
         }
 
-        updateEvil();
-
         bufferctx.drawImage(player, player.posX, player.posY);
         bufferctx.drawImage(evil.image, evil.posX, evil.posY);
+
+        updateEvil();
 
         for (var j = 0; j < playerShotsBuffer.length; j++) {
             var disparoBueno = playerShotsBuffer[j];
@@ -419,7 +427,7 @@ var game = (function () {
         }
 
         if (isEvilHittingPlayer()) {
-            killPlayer();
+            player.killPlayer();
         } else {
             for (var i = 0; i < evilShotsBuffer.length; i++) {
                 var evilShot = evilShotsBuffer[i];
@@ -449,7 +457,7 @@ var game = (function () {
     function updateEvilShot(evilShot, id) {
         if (evilShot) {
             evilShot.identifier = id;
-            if (!isShotHittingPlayer(evilShot)) {
+            if (!evilShot.isHittingPlayer()) {
                 if (evilShot.posY <= canvas.height) {
                     evilShot.posY += evilShot.speed;
                     bufferctx.drawImage(evilShot.image, evilShot.posX, evilShot.posY);
@@ -457,7 +465,7 @@ var game = (function () {
                     evilShot.deleteShot(parseInt(evilShot.identifier));
                 }
             } else {
-                killPlayer();
+                player.killPlayer();
             }
         }
     }
@@ -557,7 +565,7 @@ var game = (function () {
         list.appendChild(element);
     }
 
-    // extendemos el objeto array con un metodo "contiene"
+    // extendemos el objeto array con un metodo "containsElement"
     Array.prototype.containsElement = function(element) {
         for (var i = 0; i < this.length; i++) {
             if (this[i] == element) {
@@ -586,5 +594,4 @@ var game = (function () {
     return {
         init: init
     }
-
 })();
