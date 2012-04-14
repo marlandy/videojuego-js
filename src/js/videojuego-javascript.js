@@ -44,6 +44,17 @@ var game = (function () {
         totalBestScoresToShow = 5, // las mejores puntuaciones que se mostraran
         playerShotsBuffer = [],
         evilShotsBuffer = [],
+        evilShotImage,
+        playerShotImage,
+        playerKilledImage,
+        evilImages = {
+            animation : [],
+            killed : new Image()
+        },
+        bossImages = {
+            animation : [],
+            killed : new Image()
+        },
         keyPressed = {},
         keyMap = {
             left: 37,
@@ -59,7 +70,33 @@ var game = (function () {
         draw();
     }
 
+    function preloadImages () {
+        for (var i = 1; i <= 8; i++) {
+            var evilImage = new Image();
+            evilImage.src = 'images/malo' + i + '.png';
+            evilImages.animation[i-1] = evilImage;
+            var bossImage = new Image();
+            bossImage.src = 'images/jefe' + i + '.png';
+            bossImages.animation[i-1] = bossImage;
+        }
+        evilImages.killed.src = 'images/malo_muerto.png';
+        bossImages.killed.src = 'images/jefe_muerto.png';
+        bgMain = new Image();
+        bgMain.src = 'images/fondovertical.png';
+        bgBoss = new Image();
+        bgBoss.src = 'images/fondovertical_jefe.png';
+        playerShotImage = new Image();
+        playerShotImage.src = 'images/disparo_bueno.png';
+        evilShotImage = new Image();
+        evilShotImage.src = 'images/disparo_malo.png';
+        playerKilledImage = new Image();
+        playerKilledImage.src = 'images/bueno_muerto.png';
+
+    }
+
     function init() {
+
+        preloadImages();
 
         showBestScores();
 
@@ -70,12 +107,6 @@ var game = (function () {
         buffer.width = canvas.width;
         buffer.height = canvas.height;
         bufferctx = buffer.getContext('2d');
-
-        bgMain = new Image();
-        bgMain.src = 'images/fondovertical.png';
-
-        bgBoss = new Image();
-        bgBoss.src = 'images/fondovertical_jefe.png';
 
         player = new Player(playerLife, 0);
         evilCounter = 1;
@@ -145,7 +176,7 @@ var game = (function () {
                 this.dead = true;
                 evilShotsBuffer.splice(0, evilShotsBuffer.length);
                 playerShotsBuffer.splice(0, playerShotsBuffer.length);
-                this.src = 'images/bueno_muerto.png';
+                this.src = playerKilledImage.src;
                 createNewEvil();
                 setTimeout(function () {
                     player = new Player(player.life - 1, player.score);
@@ -161,10 +192,10 @@ var game = (function () {
     }
 
     /******************************* DISPAROS *******************************/
-    function Shot( x, y, array) {
+    function Shot( x, y, array, img) {
         this.posX = x;
         this.posY = y;
-        this.image = new Image();
+        this.image = img;
         this.speed = shotSpeed;
         this.identifier = 0;
         this.add = function () {
@@ -176,8 +207,7 @@ var game = (function () {
     }
 
     function PlayerShot (x, y) {
-        Object.getPrototypeOf(PlayerShot.prototype).constructor.call(this, x, y, playerShotsBuffer);
-        this.image.src =  'images/disparo_bueno.png';
+        Object.getPrototypeOf(PlayerShot.prototype).constructor.call(this, x, y, playerShotsBuffer, playerShotImage);
         this.isHittingEvil = function() {
             return (!evil.dead && this.posX >= evil.posX && this.posX <= (evil.posX + evil.image.width) &&
                 this.posY >= evil.posY && this.posY <= (evil.posY + evil.image.height));
@@ -188,8 +218,7 @@ var game = (function () {
     PlayerShot.prototype.constructor = PlayerShot;
 
     function EvilShot (x, y) {
-        Object.getPrototypeOf(EvilShot.prototype).constructor.call(this, x, y, evilShotsBuffer);
-        this.image.src =  'images/disparo_malo.png';
+        Object.getPrototypeOf(EvilShot.prototype).constructor.call(this, x, y, evilShotsBuffer, evilShotImage);
         this.isHittingPlayer = function() {
             return (this.posX >= player.posX && this.posX <= (player.posX + player.width)
                 && this.posY >= player.posY && this.posY <= (player.posY + player.height));
@@ -202,8 +231,8 @@ var game = (function () {
 
 
     /******************************* ENEMIGOS *******************************/
-    function Enemy(life, shots) {
-        this.image = new Image();
+    function Enemy(life, shots, enemyImages) {
+        this.image = enemyImages.animation[0];
         this.imageNumber = 1;
         this.animation = 0;
         this.posX = getRandomNumber(canvas.width - this.image.width);
@@ -212,8 +241,6 @@ var game = (function () {
         this.speed = evilSpeed;
         this.shots = shots ? shots : evilShots;
         this.dead = false;
-
-        var replacementRegExp = new RegExp(/\d{1}\.png$/);
 
         var desplazamientoHorizontal = minHorizontalOffset +
             getRandomNumber(maxHorizontalOffset - minHorizontalOffset);
@@ -225,7 +252,7 @@ var game = (function () {
         this.kill = function() {
             this.dead = true;
             totalEvils --;
-            this.image.src = this.image.src.replace(replacementRegExp, '_muerto.png');
+            this.image = enemyImages.killed;
             verifyToCreateNewEvil();
         };
 
@@ -253,7 +280,7 @@ var game = (function () {
                 if (this.imageNumber > 8) {
                     this.imageNumber = 1;
                 }
-                this.image.src = this.image.src.replace(replacementRegExp, this.imageNumber + '.png');
+                this.image = enemyImages.animation[this.imageNumber - 1];
             }
         };
 
@@ -282,8 +309,7 @@ var game = (function () {
     }
 
     function Evil (vidas, disparos) {
-        Object.getPrototypeOf(Evil.prototype).constructor.call(this, vidas, disparos);
-        this.image.src =  'images/malo1.png';
+        Object.getPrototypeOf(Evil.prototype).constructor.call(this, vidas, disparos, evilImages);
         this.goDownSpeed = evilSpeed;
         this.pointsToKill = 5 + evilCounter;
     }
@@ -292,8 +318,7 @@ var game = (function () {
     Evil.prototype.constructor = Evil;
 
     function FinalBoss () {
-        Object.getPrototypeOf(FinalBoss.prototype).constructor.call(this, finalBossLife, finalBossShots);
-        this.image.src =  'images/jefe1.png';
+        Object.getPrototypeOf(FinalBoss.prototype).constructor.call(this, finalBossLife, finalBossShots, bossImages);
         this.goDownSpeed = evilSpeed/2;
         this.pointsToKill = 20;
     }
